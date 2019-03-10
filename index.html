@@ -90,8 +90,17 @@
         let getRandomCoord = function(max) {
             return Math.floor(Math.random() * max);
         }
+       
+        let sceneChangeCountdown = -1;
 		
-		let sceneChangeCountdown = -1;
+		let isChaserNearPoint = function(chaser, x, y) {
+			if (chaser.y > y - 10 &&
+                chaser.y < y + 10 &&
+                chaser.x > x - 10 &&
+				chaser.x < x + 10) {
+					return true;
+					}
+			}
        
         let stationaryDots = [];
         for (let i = 0; i < 10; i++) {
@@ -114,9 +123,9 @@
                 y: 0,
                 color: colors[getRandomCoord(colors.length)],
                 speed: 0.35 + Math.random() * 0.3,
-				destinationX: getRandomCoord(canvas.width),
-				destinationY: getRandomCoord(canvas.height),
-				chasePlayerInstead: false,
+                destinationX: getRandomCoord(canvas.width),
+                destinationY: getRandomCoord(canvas.height),
+                chasePlayerInstead: false,
             };
         }
        
@@ -149,40 +158,53 @@
                         if (stationaryDots.length === 0) {
                             isDeleted = false;
                             chasers = [];
-							sceneChangeCountdown = 500;
+                            sceneChangeCountdown = 500;
                         }
                     }
                 }
-				sceneChangeCountdown -= 1;
-				if (sceneChangeCountdown == 0) {
-					currentScene = gamePlayScene();
-					}
-				
+                sceneChangeCountdown -= 1;
+                if (sceneChangeCountdown == 0) {
+                    currentScene = gameplayScene();
+                    }
+               
                
                 if (isDeleted) {
                     chasers.push(createChaser());
                     var isDeleted = false;
                 }
-               
                 for (var j = 0; j < chasers.length; ++j) {
-                    if (chasers[j].x < x) {
-                    chasers[j].x += chasers[j].speed ;
-                    } else if (chasers[j].x > x) {
+                    let actualDestinationX = chasers[j].destinationX;
+                    let actualDestinationY = chasers[j].destinationY;
+                    if (chasers[j].chasePlayerInstead) {
+                        actualDestinationX = x;
+                        actualDestinationY = y;
+                    }
+                   
+                    if (chasers[j].x < actualDestinationX) {
+                        chasers[j].x += chasers[j].speed;
+                    } else if (chasers[j].x > actualDestinationX) {
                         chasers[j].x -= chasers[j].speed;
                     }
                    
-                    if (chasers[j].y < y) {
+                    if (chasers[j].y < actualDestinationY) {
                         chasers[j].y += chasers[j].speed;
-                    } else if (chasers[j].y > y) {
+                    } else if (chasers[j].y > actualDestinationY) {
                         chasers[j].y -= chasers[j].speed;
                     }
-                   
-                    if (chasers[j].y > y - 10 && chasers[j].y < y + 10 && chasers[j].x > x - 10 && chasers[j].x < x + 10) {
-                        currentScene = createGameplayScene();
+              
+                    if (isChaserNearPoint(chasers[j], actualDestinationX, actualDestinationY)) {
+                        if (!chasers[j].chasePlayerInstead) {
+                            chasers[j].destinationX = getRandomCoord(canvas.width);
+                            chasers[j].destinationY = getRandomCoord(canvas.height);
+                        }
                     }
+					
+					if (isChaserNearPoint(chasers[j], x, y)) {
+						currentScene = createGameplayScene();
+					}	
                 }
             },
-           
+
             drawToScreen: function() {
                 drawCircle(x, y, 10, "#ab3a33");
                

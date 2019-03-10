@@ -85,7 +85,7 @@
         };
     };
    
-    var createGameplayScene = function() {
+    var createGameplayScene = function(levelNum) {
    
         let getRandomCoord = function(max) {
             return Math.floor(Math.random() * max);
@@ -164,7 +164,7 @@
                 }
                 sceneChangeCountdown -= 1;
                 if (sceneChangeCountdown == 0) {
-                    currentScene = gameplayScene();
+                    currentScene = createGameplayScene(levelNum + 1);
                     }
                
                
@@ -173,6 +173,14 @@
                     var isDeleted = false;
                 }
                 for (var j = 0; j < chasers.length; ++j) {
+					if (levelNum == 2) {
+						if (getRandomCoord(1)){
+							chasers[j].chasePlayerInstead = true;
+						}
+					}
+					if (levelNum == 3) {
+						chasers[j].chasePlayerInstead = true;
+					}
                     let actualDestinationX = chasers[j].destinationX;
                     let actualDestinationY = chasers[j].destinationY;
                     if (chasers[j].chasePlayerInstead) {
@@ -200,7 +208,7 @@
                     }
 					
 					if (isChaserNearPoint(chasers[j], x, y)) {
-						currentScene = createGameplayScene();
+						currentScene = createGameplayScene(levelNum);
 					}	
                 }
             },
@@ -220,7 +228,7 @@
         return gameplayScene;
     };
    
-    let currentScene = createGameplayScene();
+    let currentScene = createGameplayScene(1);
    
     var runFrame = function() {
        

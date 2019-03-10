@@ -70,7 +70,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		   
 			for (let key of pressedThisFrame) {
 				if (key == 'p') {
-					switchToNewScene(createPauseScene(gameplayScene));
+					switchToNewScene(createPauseScene(gameplayScene, screenWidth, screenHeight));
 				}
 			}
 		},
@@ -83,7 +83,11 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 					if (stationaryDots.length === 0) {
 						isDeleted = false;
 						chasers = [];
+						if (levelNum == 3) {
+							sceneChangeCountdown = -1;
+						} else {
 						sceneChangeCountdown = 500;
+						}
 					}
 				}
 			}

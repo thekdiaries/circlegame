@@ -85,7 +85,7 @@
         };
     };
    
-    var createGameplayScene = function(levelNum) {
+    var createGameplayScene = function(levelNum, startX, startY) {
    
         let getRandomCoord = function(max) {
             return Math.floor(Math.random() * max);
@@ -118,6 +118,16 @@
        
         let createChaser = function() {
             colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
+			
+			let shouldChase = false;
+			if (levelNum == 2) {
+				if (getRandomCoord(2) === 1) {
+					shouldChase = true;
+				}
+			} else if (levelNum == 3) {
+				shouldChase = true;
+			}
+			
             return {
                 x: 0,
                 y: 0,
@@ -125,7 +135,7 @@
                 speed: 0.35 + Math.random() * 0.3,
                 destinationX: getRandomCoord(canvas.width),
                 destinationY: getRandomCoord(canvas.height),
-                chasePlayerInstead: false,
+                chasePlayerInstead: shouldChase
             };
         }
        
@@ -164,7 +174,7 @@
                 }
                 sceneChangeCountdown -= 1;
                 if (sceneChangeCountdown == 0) {
-                    currentScene = createGameplayScene(levelNum + 1);
+                    currentScene = createGameplayScene(levelNum + 1, x, y);
                     }
                
                
@@ -173,11 +183,6 @@
                     var isDeleted = false;
                 }
                 for (var j = 0; j < chasers.length; ++j) {
-					if (levelNum == 2) {
-						if (getRandomCoord(1)){
-							chasers[j].chasePlayerInstead = true;
-						}
-					}
 					if (levelNum == 3) {
 						chasers[j].chasePlayerInstead = true;
 					}
@@ -208,11 +213,10 @@
                     }
 					
 					if (isChaserNearPoint(chasers[j], x, y)) {
-						currentScene = createGameplayScene(levelNum);
+						currentScene = createGameplayScene(levelNum, canvas.width/2, canvas.height/2);
 					}	
                 }
             },
-
             drawToScreen: function() {
                 drawCircle(x, y, 10, "#ab3a33");
                
@@ -228,7 +232,7 @@
         return gameplayScene;
     };
    
-    let currentScene = createGameplayScene(1);
+    let currentScene = createGameplayScene(1, canvas.width/2, canvas.height/2);
    
     var runFrame = function() {
        

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Gamedev Canvas Workshop</title>
+    <title>Circle Game</title>
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
@@ -14,147 +14,210 @@
 
 <script>
 (function() {
-	var canvas = document.getElementById("myCanvas");
-	var ctx = canvas.getContext("2d");
-	var x;
-	var y;
-	var rightPressed = false;
-	var leftPressed = false;
-	var upPressed = false;
-	var downPressed = false;
-	var stationaryDots;
-	var chasers;
-	var colors;
-
-	var createChaser = function() {
-		colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
-		return {
-			x: 0,
-			y: 0,
-			color: colors[getRandomCoord(colors.length)],
-			speed: 0.35 + Math.random() * 0.3
-		};
-	}
-	 
-	var initialise = function() {
-		stationaryDots = [];
-		for (let i = 0; i < 10; i++) {
-			let dot = {
-				x: getRandomCoord(canvas.width),
-				y: getRandomCoord(canvas.height),
-				color: "#b2817d",
-				};
-			stationaryDots.push(dot);
-		}
-		x = canvas.width / 2;
-		y = canvas.height / 2;
-		isDeleted = false;
-		chasers = [];
-	}
-	 
-	var getRandomCoord = function(max) {
-		return Math.floor(Math.random() * max);
-	}
-	 
-	var keyDownHandler = function(e) {
-		if (e.key == "Right" || e.key == "ArrowRight") {
-			rightPressed = true;
-		} else if (e.key == "Left" || e.key == "ArrowLeft") {
-			leftPressed = true;
-		} else if (e.key == "Up" || e.key == "ArrowUp") {
-			upPressed = true;
-		} else if (e.key == "Down" || e.key == "ArrowDown") {
-			downPressed = true;
-		}
-	}
-	 
-	var keyUpHandler = function(e) {
-		if (e.key == "Right" || e.key == "ArrowRight") {
-			rightPressed = false;
-		} else if (e.key == "Left" || e.key == "ArrowLeft") {
-			leftPressed = false;
-		} else if (e.key == "Up" || e.key == "ArrowUp") {
-			upPressed = false;
-		} else if (e.key == "Down" || e.key == "ArrowDown") {
-			downPressed = false;
-		}
-	}
-	 
-	var drawCircle = function(x, y, radius, hex) {
-		ctx.beginPath();
-		ctx.arc(x, y, radius, 0, Math.PI*2);
-		ctx.fillStyle = hex;
-		ctx.fill();
-		ctx.closePath();
-	}
-	 
-	var drawRectangle = function(left, top, width, height, hex) {
-		ctx.beginPath();
-		ctx.rect(left, top, width, height);
-		ctx.fillStyle = hex;
-		ctx.fill();
-		ctx.closePath();
-	}
-	 
-	var draw = function() {
-		drawRectangle(0, 0, canvas.width, canvas.height, "#282720");
-		drawCircle(x, y, 10, "#ab3a33");
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    var pressedKeys = {
+        right: false,
+        left: false,
+        up: false,
+        down: false
+    };
+    var pushedThisFrame = [];
+   
+    var getKeyFromEvent = function(e) {
+        if (e.key == "Right" || e.key == "ArrowRight") {
+            return 'right';
+        } else if (e.key == "Left" || e.key == "ArrowLeft") {
+            return 'left';
+        } else if (e.key == "Up" || e.key == "ArrowUp") {
+            return 'up';
+        } else if (e.key == "Down" || e.key == "ArrowDown") {
+            return 'down';
+        } else if (e.key == "p") {
+            return 'p';
+        }
+        return 'unknown';
+    }
+   
+    var keyDownHandler = function(e) {
+        var key = getKeyFromEvent(e);
+        pressedKeys[key] = true;
+        pushedThisFrame.push(key);
+    };
+   
+    var keyUpHandler = function(e) {
+        var key = getKeyFromEvent(e);
+        pressedKeys[key] = false;
+    };
+     
+    var drawCircle = function(x, y, radius, hex) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI*2);
+        ctx.fillStyle = hex;
+        ctx.fill();
+        ctx.closePath();
+    }
+     
+    var drawRectangle = function(left, top, width, height, hex) {
+        ctx.beginPath();
+        ctx.rect(left, top, width, height);
+        ctx.fillStyle = hex;
+        ctx.fill();
+        ctx.closePath();
+    }
+   
+    var createPauseScene = function(sceneToReturnTo) {
+        return {
+            handleUserInput: function(pressedKeys, pressedThisFrame) {
+                for (let key of pressedThisFrame) {
+                    if (key == 'p') {
+                        currentScene = sceneToReturnTo;
+                    }
+                }
+            },
+            updateModel: function() { },
+            drawToScreen: function() {
+                sceneToReturnTo.drawToScreen();
+                ctx.globalAlpha = .5;
+                drawRectangle(0, 0, canvas.width, canvas.height, '#000000');
+                ctx.globalAlpha = 1.0;
+            }
+        };
+    };
+   
+    var createGameplayScene = function() {
+   
+        let getRandomCoord = function(max) {
+            return Math.floor(Math.random() * max);
+        }
 		
-		for (key in stationaryDots) {
-			drawCircle(stationaryDots[key].x, stationaryDots[key].y, 5, stationaryDots[key].color);
-		}
-	   
-		for (key in stationaryDots) {
-			if (stationaryDots[key].y > y - 10 && stationaryDots[key].y < y + 10 && stationaryDots[key].x > x - 10 && stationaryDots[key].x < x + 10) {
-				var isDeleted = true;
-				delete stationaryDots.splice(key, 1);
-				if (stationaryDots.length === 0) {
-				isDeleted = false;
-				chasers = [];
-				}
-			}
-		}
-	   
-		   if (isDeleted) {
-			chasers.push(createChaser());
-			var isDeleted = false;
-		}
-		
-		for (var j = 0; j < chasers.length; ++j) {
-			drawCircle(chasers[j].x, chasers[j].y, 10, chasers[j].color);
-			if (chasers[j].x < x) {
-			chasers[j].x += chasers[j].speed ;
-			} else if (chasers[j].x > x) {
-				chasers[j].x -= chasers[j].speed;
-			}
-		   
-			if (chasers[j].y < y) {
-				chasers[j].y += chasers[j].speed;
-			} else if (chasers[j].y > y) {
-				chasers[j].y -= chasers[j].speed;
-			}
-		   
-			if (chasers[j].y > y - 10 && chasers[j].y < y + 10 && chasers[j].x > x - 10 && chasers[j].x < x + 10) {
-				initialise();
-			}
-		}
-		if (rightPressed && x < canvas.width) {
-			x += 1;
-		} else if (leftPressed && x > 0) {
-			x -= 1;
-		}
-	   
-		if (upPressed && y > 0) {
-			y -= 1;
-		} else if (downPressed && y < canvas.height) {
-			y += 1;
-		}  
-	}
-
-	document.addEventListener("keydown", keyDownHandler, false);
-	document.addEventListener("keyup", keyUpHandler, false);
-	initialise();
-	setInterval(draw, 10);
+		let sceneChangeCountdown = -1;
+       
+        let stationaryDots = [];
+        for (let i = 0; i < 10; i++) {
+            let dot = {
+                x: getRandomCoord(canvas.width),
+                y: getRandomCoord(canvas.height),
+                color: "#b2817d",
+                };
+            stationaryDots.push(dot);
+        }
+        let x = canvas.width / 2;
+        let y = canvas.height / 2;
+        let isDeleted = false;
+        let chasers = [];
+       
+        let createChaser = function() {
+            colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
+            return {
+                x: 0,
+                y: 0,
+                color: colors[getRandomCoord(colors.length)],
+                speed: 0.35 + Math.random() * 0.3,
+				destinationX: getRandomCoord(canvas.width),
+				destinationY: getRandomCoord(canvas.height),
+				chasePlayerInstead: false,
+            };
+        }
+       
+        var gameplayScene = {
+            handleUserInput: function(pressedKeys, pressedThisFrame) {
+                if (pressedKeys.right && x < canvas.width) {
+                    x += 1;
+                } else if (pressedKeys.left && x > 0) {
+                    x -= 1;
+                }
+               
+                if (pressedKeys.up && y > 0) {
+                    y -= 1;
+                } else if (pressedKeys.down && y < canvas.height) {
+                    y += 1;
+                }
+               
+                for (let key of pressedThisFrame) {
+                    if (key == 'p') {
+                        currentScene = createPauseScene(gameplayScene);
+                    }
+                }
+            },
+           
+            updateModel: function() {
+                for (key in stationaryDots) {
+                    if (stationaryDots[key].y > y - 10 && stationaryDots[key].y < y + 10 && stationaryDots[key].x > x - 10 && stationaryDots[key].x < x + 10) {
+                        var isDeleted = true;
+                        delete stationaryDots.splice(key, 1);
+                        if (stationaryDots.length === 0) {
+                            isDeleted = false;
+                            chasers = [];
+							sceneChangeCountdown = 500;
+                        }
+                    }
+                }
+				sceneChangeCountdown -= 1;
+				if (sceneChangeCountdown == 0) {
+					currentScene = gamePlayScene();
+					}
+				
+               
+                if (isDeleted) {
+                    chasers.push(createChaser());
+                    var isDeleted = false;
+                }
+               
+                for (var j = 0; j < chasers.length; ++j) {
+                    if (chasers[j].x < x) {
+                    chasers[j].x += chasers[j].speed ;
+                    } else if (chasers[j].x > x) {
+                        chasers[j].x -= chasers[j].speed;
+                    }
+                   
+                    if (chasers[j].y < y) {
+                        chasers[j].y += chasers[j].speed;
+                    } else if (chasers[j].y > y) {
+                        chasers[j].y -= chasers[j].speed;
+                    }
+                   
+                    if (chasers[j].y > y - 10 && chasers[j].y < y + 10 && chasers[j].x > x - 10 && chasers[j].x < x + 10) {
+                        currentScene = createGameplayScene();
+                    }
+                }
+            },
+           
+            drawToScreen: function() {
+                drawCircle(x, y, 10, "#ab3a33");
+               
+                for (key in stationaryDots) {
+                    drawCircle(stationaryDots[key].x, stationaryDots[key].y, 5, stationaryDots[key].color);
+                }
+               
+                for (var j = 0; j < chasers.length; ++j) {
+                    drawCircle(chasers[j].x, chasers[j].y, 10, chasers[j].color);
+                }
+            }
+        };
+        return gameplayScene;
+    };
+   
+    let currentScene = createGameplayScene();
+   
+    var runFrame = function() {
+       
+        currentScene.handleUserInput(pressedKeys, pushedThisFrame);
+       
+        // out with the old, in with the new.
+        pushedThisFrame = [];
+       
+        currentScene.updateModel();
+       
+        // every potential screen will probably want to start with a blank background.
+        drawRectangle(0, 0, canvas.width, canvas.height, "#282720");
+       
+        currentScene.drawToScreen();
+    }
+ 
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+    setInterval(runFrame, 10);
 })();
 </script>
 

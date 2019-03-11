@@ -22,16 +22,51 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			x: getRandomCoord(screenWidth),
 			y: getRandomCoord(screenHeight),
 			color: "#b2817d",
-		};
+			drawMe: function(g){
+				g.drawCircle(dot.x, dot.y, 5, dot.color);
+			},
+			isDead: false,
+			updateMe: function() {
+				if (dot.y > player.y - 10 && dot.y < player.y + 10 && dot.x > player.x - 10 && dot.x < player.x + 10) {
+					dot.isDead = true;
+					stationaryDots.splice(stationaryDots.indexOf(dot), 1);
+					if (stationaryDots.length === 0) {
+						dot.isDead = false;
+						chasers = [];
+						if (levelNum == 4) {
+							sceneChangeCountdown = -1;
+						} else {
+						sceneChangeCountdown = 500;
+						}
+					}
+				}
+				if (dot.isDead) {
+					if (levelNum == 4) {
+						chasers.push(createChaser(0, 0));
+						chasers.push(createChaser(0, screenHeight));
+						chasers.push(createChaser(screenWidth, 0));
+						chasers.push(createChaser(screenWidth, screenHeight));
+					} else {
+						chasers.push(createChaser(0, 0));
+					}
+				}
+			}	
+		}
 		stationaryDots.push(dot);
 	}
+	let player = {
+		x: startX,
+		y: startY,
+		drawMe: function(g) {
+			g.drawCircle(player.x, player.y, 10, "#ab3a33");
+		},
+		isDead: false,
+		updateMe: function() {}
+	}	
 	
-	let x = startX;
-	let y = startY;
-	let isDeleted = false;
 	let chasers = [];
    
-	let createChaser = function() {
+	let createChaser = function(x, y) {
 		colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
 		
 		let shouldChase = false;
@@ -43,29 +78,68 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			shouldChase = true;
 		}
 		
-		return {
-			x: 0,
-			y: 0,
+		var chaser = {
+			x: x,
+			y: y,
 			color: colors[getRandomCoord(colors.length)],
 			speed: 0.35 + Math.random() * 0.3,
 			destinationX: getRandomCoord(screenWidth),
 			destinationY: getRandomCoord(screenHeight),
-			chasePlayerInstead: shouldChase
+			chasePlayerInstead: shouldChase,
+			drawMe: function(g) {
+				g.drawCircle(chaser.x, chaser.y, 10, chaser.color);
+			},
+			isDead: false,
+			updateMe: function() {
+				if (levelNum == 3) {
+					chasers[j].chasePlayerInstead = true;
+				}
+				let actualDestinationX = chaser.destinationX;
+				let actualDestinationY = chaser.destinationY;
+				if (chaser.chasePlayerInstead) {
+					actualDestinationX = player.x;
+					actualDestinationY = player.y;
+				}
+			   
+				if (chaser.x < actualDestinationX) {
+					chaser.x += chaser.speed;
+				} else if (chaser.x > actualDestinationX) {
+					chaser.x -= chaser.speed;
+				}
+			   
+				if (chaser.y < actualDestinationY) {
+					chaser.y += chaser.speed;
+				} else if (chaser.y > actualDestinationY) {
+					chaser.y -= chaser.speed;
+				}
+		  
+				if (isChaserNearPoint(chaser, actualDestinationX, actualDestinationY)) {
+					if (!chaser.chasePlayerInstead) {
+						chaser.destinationX = getRandomCoord(screenWidth);
+						chaser.destinationY = getRandomCoord(screenHeight);
+					}
+				}
+				
+				if (isChaserNearPoint(chaser, player.x, player.y)) {
+					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
+				}	
+			}
 		};
+		return chaser;
 	}
    
 	var gameplayScene = {
 		handleUserInput: function(pressedKeys, pressedThisFrame) {
-			if (pressedKeys.right && x < screenWidth) {
-				x += 1;
-			} else if (pressedKeys.left && x > 0) {
-				x -= 1;
+			if (pressedKeys.right && player.x < screenWidth) {
+				player.x += 1;
+			} else if (pressedKeys.left && player.x > 0) {
+				player.x -= 1;
 			}
 		   
-			if (pressedKeys.up && y > 0) {
-				y -= 1;
-			} else if (pressedKeys.down && y < screenHeight) {
-				y += 1;
+			if (pressedKeys.up && player.y > 0) {
+				player.y -= 1;
+			} else if (pressedKeys.down && player.y < screenHeight) {
+				player.y += 1;
 			}
 		   
 			for (let key of pressedThisFrame) {
@@ -76,77 +150,26 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		},
 	   
 		updateModel: function() {
-			for (key in stationaryDots) {
-				if (stationaryDots[key].y > y - 10 && stationaryDots[key].y < y + 10 && stationaryDots[key].x > x - 10 && stationaryDots[key].x < x + 10) {
-					var isDeleted = true;
-					delete stationaryDots.splice(key, 1);
-					if (stationaryDots.length === 0) {
-						isDeleted = false;
-						chasers = [];
-						if (levelNum == 3) {
-							sceneChangeCountdown = -1;
-						} else {
-						sceneChangeCountdown = 500;
-						}
-					}
-				}
-			}
 			sceneChangeCountdown -= 1;
 			if (sceneChangeCountdown == 0) {
-				switchToNewScene(createGameplayScene(levelNum + 1, x, y, screenWidth, screenHeight));
+				switchToNewScene(createGameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
 			}
-		   
-		   
-			if (isDeleted) {
-				chasers.push(createChaser());
-				var isDeleted = false;
+			for (let dot of stationaryDots) {
+				dot.updateMe();
 			}
-			for (var j = 0; j < chasers.length; ++j) {
-				if (levelNum == 3) {
-					chasers[j].chasePlayerInstead = true;
-				}
-				let actualDestinationX = chasers[j].destinationX;
-				let actualDestinationY = chasers[j].destinationY;
-				if (chasers[j].chasePlayerInstead) {
-					actualDestinationX = x;
-					actualDestinationY = y;
-				}
-			   
-				if (chasers[j].x < actualDestinationX) {
-					chasers[j].x += chasers[j].speed;
-				} else if (chasers[j].x > actualDestinationX) {
-					chasers[j].x -= chasers[j].speed;
-				}
-			   
-				if (chasers[j].y < actualDestinationY) {
-					chasers[j].y += chasers[j].speed;
-				} else if (chasers[j].y > actualDestinationY) {
-					chasers[j].y -= chasers[j].speed;
-				}
-		  
-				if (isChaserNearPoint(chasers[j], actualDestinationX, actualDestinationY)) {
-					if (!chasers[j].chasePlayerInstead) {
-						chasers[j].destinationX = getRandomCoord(screenWidth);
-						chasers[j].destinationY = getRandomCoord(screenHeight);
-					}
-				}
-				
-				if (isChaserNearPoint(chasers[j], x, y)) {
-					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
-				}	
+			for (let chaser of chasers) {
+				chaser.updateMe();
 			}
 		},
-		drawToScreen: function(g) {
-			g.drawCircle(x, y, 10, "#ab3a33");
-		   
-			for (key in stationaryDots) {
-				g.drawCircle(stationaryDots[key].x, stationaryDots[key].y, 5, stationaryDots[key].color);
-			}
-		   
-			for (var j = 0; j < chasers.length; ++j) {
-				g.drawCircle(chasers[j].x, chasers[j].y, 10, chasers[j].color);
-			}
-		}
-	};
-	return gameplayScene;
+        drawToScreen: function(g) {
+            player.drawMe(g);
+            for (let dot of stationaryDots) {
+                dot.drawMe(g);
+            }
+            for (let chaser of chasers) {
+                chaser.drawMe(g);
+            }
+        }
+    }
+    return gameplayScene;
 };

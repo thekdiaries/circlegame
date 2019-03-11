@@ -40,15 +40,16 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 						}
 					}
 				}
-				if (dot.isDead) {
-					if (levelNum == 4) {
-						chasers.push(createChaser(0, 0));
-						chasers.push(createChaser(0, screenHeight));
-						chasers.push(createChaser(screenWidth, 0));
-						chasers.push(createChaser(screenWidth, screenHeight));
-					} else {
-						chasers.push(createChaser(0, 0));
+				if (levelNum == 4) {
+					if (chasers.length < 41) {
+						if (dot.isDead) {
+							for (let i = 0; i < 41; i++) {
+								chasers.push(createChaser(0, 0));
+							}
+						}
 					}
+				} else if (dot.isDead) {
+					chasers.push(createChaser(0, 0));
 				}
 			}	
 		}
@@ -92,7 +93,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			isDead: false,
 			updateMe: function() {
 				if (levelNum == 3) {
-					chasers[j].chasePlayerInstead = true;
+					chaser.chasePlayerInstead = true;
 				}
 				let actualDestinationX = chaser.destinationX;
 				let actualDestinationY = chaser.destinationY;

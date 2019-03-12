@@ -9,7 +9,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		isDead: false,
 		updateMe: function() {},
 		type: "player",
-	}
+	};
 
 	var sprites = [player];
  	
@@ -21,12 +21,12 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			}
 		}
 		return counter;
-	}
+	};
 	
 	
-	let getRandomCoord = function(max) {
+	let getRandomNum = function(max) {
 		return Math.floor(Math.random() * max);
-	}
+	};
    
 	let sceneChangeCountdown = -1;
 	
@@ -41,8 +41,8 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 
 	for (let i = 0; i < 10; i++) {
 		let dot = {
-			x: getRandomCoord(screenWidth),
-			y: getRandomCoord(screenHeight),
+			x: getRandomNum(screenWidth),
+			y: getRandomNum(screenHeight),
 			color: "#b2817d",
 			drawMe: function(g){
 				g.drawCircle(dot.x, dot.y, 5, dot.color);
@@ -75,16 +75,16 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 				}
 				 
 			},
-		}
+		};
 		sprites.push(dot);
 	}
-	   
+	
 	let createChaser = function(x, y) {
-		colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
+		let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
 		
 		let shouldChase = false;
 		if (levelNum == 2) {
-			if (getRandomCoord(2) === 1) {
+			if (getRandomNum(2) === 1) {
 				shouldChase = true;
 			}
 		} else if (levelNum == 3) {
@@ -94,10 +94,10 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		var chaser = {
 			x: x,
 			y: y,
-			color: colors[getRandomCoord(colors.length)],
+			color: colors[getRandomNum(colors.length)],
 			speed: 0.35 + Math.random() * 0.3,
-			destinationX: getRandomCoord(screenWidth),
-			destinationY: getRandomCoord(screenHeight),
+			destinationX: getRandomNum(screenWidth),
+			destinationY: getRandomNum(screenHeight),
 			chasePlayerInstead: shouldChase,
 			drawMe: function(g) {
 				g.drawCircle(chaser.x, chaser.y, 10, chaser.color);
@@ -129,19 +129,55 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		  
 				if (isChaserNearPoint(chaser, actualDestinationX, actualDestinationY)) {
 					if (!chaser.chasePlayerInstead) {
-						chaser.destinationX = getRandomCoord(screenWidth);
-						chaser.destinationY = getRandomCoord(screenHeight);
+						chaser.destinationX = getRandomNum(screenWidth);
+						chaser.destinationY = getRandomNum(screenHeight);
 					}
 				}
 				
 				if (isChaserNearPoint(chaser, player.x, player.y)) {
 					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
-				}	
+				}
+				if (chaser.isDead) {
+					for (let i = 0; i < 5; i++) {
+						sprites.push(createDebris(chaser.x, chaser.y));
+					}
+				}
 			},
 		};
 		return chaser;
+	};
+	
+	let createDebris = function(x, y) {
+			let debris = {
+			x: x,
+			y: y,
+			destinationX: getRandomNum(screenWidth),
+			destinationY: getRandomNum(screenHeight),
+			speed: 0.2,
+			radius: 10,
+			drawMe: function(g) {
+						g.drawCircle(debris.x, debris.y, debris.radius, "#e2d9a2") 
+				},
+			updateMe: function() {
+					debris.radius = debris.radius - 0.1;
+					if (debris.radius <= 0) { debris.isDead = true;}
+					if (debris.x < debris.destinationX) {
+							debris.x += debris.speed;
+					} else if (debris.x > debris.destinationX) {
+							debris.x -= debris.speed;
+					}
+					   
+					if (debris.y < debris.destinationY) {
+							debris.y += debris.speed;
+					} else if (debris.y > debris.destinationY) {
+							debris.y -= debris.speed;
+					}
+				},
+			type: "debris",
+			isDead: false,
+		};
+	return debris;
 	}
-   
 	var gameplayScene = {
 		handleUserInput: function(pressedKeys, pressedThisFrame) {
 			if (pressedKeys.right && player.x < screenWidth) {
@@ -168,20 +204,15 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			if (sceneChangeCountdown == 0) {
 				switchToNewScene(createGameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
 			}
-			for (let sprite of sprites) {
+			sprites.forEach(function(sprite) {
 				sprite.updateMe();
-			}
-			for (let i = 0; i < sprites.length; ++i) {
-				if (sprites[i].isDead) {
-					sprites.splice(i, 1);
-					i -= 1;
-				}
-			}
+			})
+			sprites = sprites.filter(function(sprite) { return !sprite.isDead });
 		},
         drawToScreen: function(g) {
-            for (let sprite of sprites) {
-			sprite.drawMe(g);
-			}
+            sprites.forEach (function(sprite){
+				sprite.drawMe(g);
+			})
         }
     }
     return gameplayScene;

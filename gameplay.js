@@ -1,6 +1,29 @@
 
 var createGameplayScene = function(levelNum, startX, startY, screenWidth, screenHeight) {
+	let player = {
+		x: startX,
+		y: startY,
+		drawMe: function(g) {
+			g.drawCircle(player.x, player.y, 10, "#ab3a33");
+		},
+		isDead: false,
+		updateMe: function() {},
+		type: "player",
+	}
 
+	var sprites = [player];
+ 	
+	let typeCounter = function(string) {
+		let counter = 0;
+		for (let sprite of sprites) {
+			if (sprite.type === string && sprite.isDead === false){
+				counter += 1;
+			}
+		}
+		return counter;
+	}
+	
+	
 	let getRandomCoord = function(max) {
 		return Math.floor(Math.random() * max);
 	}
@@ -16,7 +39,6 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		}
 	};
 
-	let stationaryDots = [];
 	for (let i = 0; i < 10; i++) {
 		let dot = {
 			x: getRandomCoord(screenWidth),
@@ -26,47 +48,37 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 				g.drawCircle(dot.x, dot.y, 5, dot.color);
 			},
 			isDead: false,
+			type: "dot",
 			updateMe: function() {
 				if (dot.y > player.y - 10 && dot.y < player.y + 10 && dot.x > player.x - 10 && dot.x < player.x + 10) {
 					dot.isDead = true;
-					stationaryDots.splice(stationaryDots.indexOf(dot), 1);
-					if (stationaryDots.length === 0) {
-						dot.isDead = false;
-						chasers = [];
+					if (typeCounter("dot") === 0) {
+						for (let chaser of sprites.filter(function(sprites) { return sprites.type === "chaser"; })) {
+							chaser.isDead = true;
+						}
 						if (levelNum == 4) {
 							sceneChangeCountdown = -1;
 						} else {
 						sceneChangeCountdown = 500;
 						}
-					}
-				}
-				if (levelNum == 4) {
-					if (chasers.length < 41) {
-						if (dot.isDead) {
-							for (let i = 0; i < 41; i++) {
-								chasers.push(createChaser(0, 0));
+					} else if (dot.isDead && levelNum !== 4) {
+						sprites.push(createChaser(0, 0));
+					} else if (levelNum == 4) {
+						if (typeCounter("chaser") < 41) {
+							if (dot.isDead) {
+								for (let i = 0; i < 41; i++) {
+									sprites.push(createChaser(0, 0));
+								}
 							}
 						}
 					}
-				} else if (dot.isDead) {
-					chasers.push(createChaser(0, 0));
 				}
-			}	
+				 
+			},
 		}
-		stationaryDots.push(dot);
+		sprites.push(dot);
 	}
-	let player = {
-		x: startX,
-		y: startY,
-		drawMe: function(g) {
-			g.drawCircle(player.x, player.y, 10, "#ab3a33");
-		},
-		isDead: false,
-		updateMe: function() {}
-	}	
-	
-	let chasers = [];
-   
+	   
 	let createChaser = function(x, y) {
 		colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
 		
@@ -91,6 +103,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 				g.drawCircle(chaser.x, chaser.y, 10, chaser.color);
 			},
 			isDead: false,
+			type: "chaser",
 			updateMe: function() {
 				if (levelNum == 3) {
 					chaser.chasePlayerInstead = true;
@@ -124,7 +137,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 				if (isChaserNearPoint(chaser, player.x, player.y)) {
 					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
 				}	
-			}
+			},
 		};
 		return chaser;
 	}
@@ -155,21 +168,20 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			if (sceneChangeCountdown == 0) {
 				switchToNewScene(createGameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
 			}
-			for (let dot of stationaryDots) {
-				dot.updateMe();
+			for (let sprite of sprites) {
+				sprite.updateMe();
 			}
-			for (let chaser of chasers) {
-				chaser.updateMe();
+			for (let i = 0; i < sprites.length; ++i) {
+				if (sprites[i].isDead) {
+					sprites.splice(i, 1);
+					i -= 1;
+				}
 			}
 		},
         drawToScreen: function(g) {
-            player.drawMe(g);
-            for (let dot of stationaryDots) {
-                dot.drawMe(g);
-            }
-            for (let chaser of chasers) {
-                chaser.drawMe(g);
-            }
+            for (let sprite of sprites) {
+			sprite.drawMe(g);
+			}
         }
     }
     return gameplayScene;

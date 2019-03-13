@@ -3,8 +3,9 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 	let player = {
 		x: startX,
 		y: startY,
+		radius: 10,
 		drawMe: function(g) {
-			g.drawCircle(player.x, player.y, 10, "#A41D23");
+			g.drawCircle(player.x, player.y, player.radius, "#A41D23");
 		},
 		isDead: false,
 		updateMe: function() {},
@@ -12,6 +13,78 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 	};
 
 	var sprites = [player];
+	
+		let createChaser = function(x, y) {
+		let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6", "#0078AD", "#548955", "#FC9F28", "#8B5E41", "#006F8A", "#438D1C", "#1C5580"];
+		
+		let shouldChase = false;
+		if (levelNum == 2 || levelNum == 6) {
+			if (getRandomNum(2) === 1) {
+				shouldChase = true;
+			}
+		} else if (levelNum == 3) {
+			shouldChase = true;
+		}
+		
+		var chaser = {
+			x: x,
+			y: y,
+			color: colors[getRandomNum(colors.length)],
+			speed: 0.35 + Math.random() * 0.3,
+			radius: 10,
+			destinationX: getRandomNum(screenWidth),
+			destinationY: getRandomNum(screenHeight),
+			chasePlayerInstead: shouldChase,
+			drawMe: function(g) {
+				g.drawCircle(chaser.x, chaser.y, chaser.radius, chaser.color);
+			},
+			isDead: false,
+			type: "chaser",
+			updateMe: function() {
+				if (levelNum == 5 || levelNum == 6) 
+					chaser.radius += 0.005;
+					
+				if (levelNum == 3 || levelNum == 5) {
+					chaser.chasePlayerInstead = true;
+				}
+				let actualDestinationX = chaser.destinationX;
+				let actualDestinationY = chaser.destinationY;
+				if (chaser.chasePlayerInstead) {
+					actualDestinationX = player.x;
+					actualDestinationY = player.y;
+				}
+			   
+				if (chaser.x < actualDestinationX) {
+					chaser.x += chaser.speed;
+				} else if (chaser.x > actualDestinationX) {
+					chaser.x -= chaser.speed;
+				}
+			   
+				if (chaser.y < actualDestinationY) {
+					chaser.y += chaser.speed;
+				} else if (chaser.y > actualDestinationY) {
+					chaser.y -= chaser.speed;
+				}
+		  
+				if (isChaserNearPoint(chaser, actualDestinationX, actualDestinationY)) {
+					if (!chaser.chasePlayerInstead) {
+						chaser.destinationX = getRandomNum(screenWidth);
+						chaser.destinationY = getRandomNum(screenHeight);
+					}
+				}
+				
+				if (doSpritesCollide(chaser, player)) {
+					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
+				}
+				if (chaser.isDead) {
+					for (let i = 0; i < 5; i++) {
+						sprites.push(createDebris(chaser.x, chaser.y));
+					}
+				}
+			},
+		};
+		return chaser;
+	};
 	
 	let createObstacle = function() {
 		let obstacle = {
@@ -37,7 +110,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 					} else if (obstacle.y > obstacle.destinationY) {
 							obstacle.y -= obstacle.speed;
 					}
-					if (isChaserNearPoint(obstacle, player.x, player.y)) {
+					if (doSpritesCollide(obstacle, player)) {
 					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
 					}
 				},
@@ -72,6 +145,16 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 				return true;
 		}
 	};
+	
+	let distanceBetweenSprites = function(a, b) {
+		let diffX = a.x - b.x;
+		let diffY = a.y - b.y;
+		return Math.sqrt(diffX * diffX + diffY * diffY);
+	};
+	
+	let doSpritesCollide = function(a, b) {
+		return distanceBetweenSprites(a, b) <= a.radius + b.radius;
+	};
 
 	for (let i = 0; i < 10; i++) {
 		let dot = {
@@ -94,12 +177,12 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 						for (let obstacle of sprites.filter(function(sprites) { return sprites.type === "obstacle"; })) {
 							obstacle.isDead = true;
 						}
-						if (levelNum == 5) {
+						if (levelNum == 6) {
 							sceneChangeCountdown = -1;
 						} else {
 						sceneChangeCountdown = 500;
 						}
-					} else if (dot.isDead && levelNum !== 4) {
+					} else if (dot.isDead && levelNum !== 4 && levelNum !== 6) {
 						sprites.push(createChaser(0, 0));
 					} else if (levelNum == 4) {
 						if (typeCounter("chaser") < 41) {
@@ -109,85 +192,21 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 								}
 							}
 						}
-					}
+					} else if (levelNum == 6) {
+						if (dot.isDead) {
+							sprites.filter(function(sprites) { return sprites.type === "chaser"; })[1].isDead = true;
+						}
+					} 
+						
 				}
 				 
 			},
 		};
+		if (levelNum == 6) {
+			sprites.push(createChaser(0, 0));
+		}
 		sprites.push(dot);
 	}
-	
-	let createChaser = function(x, y) {
-		let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6", "#0078AD", "#548955", "#FC9F28", "#8B5E41", "#006F8A", "#438D1C", "#1C5580"];
-		
-		let shouldChase = false;
-		if (levelNum == 2) {
-			if (getRandomNum(2) === 1) {
-				shouldChase = true;
-			}
-		} else if (levelNum == 3) {
-			shouldChase = true;
-		}
-		
-		var chaser = {
-			x: x,
-			y: y,
-			color: colors[getRandomNum(colors.length)],
-			speed: 0.35 + Math.random() * 0.3,
-			radius: 10,
-			destinationX: getRandomNum(screenWidth),
-			destinationY: getRandomNum(screenHeight),
-			chasePlayerInstead: shouldChase,
-			drawMe: function(g) {
-				g.drawCircle(chaser.x, chaser.y, chaser.radius, chaser.color);
-			},
-			isDead: false,
-			type: "chaser",
-			updateMe: function() {
-				if (levelNum == 5) 
-					chaser.radius += 0.005;
-					
-				if (levelNum == 3 || levelNum == 5) {
-					chaser.chasePlayerInstead = true;
-				}
-				let actualDestinationX = chaser.destinationX;
-				let actualDestinationY = chaser.destinationY;
-				if (chaser.chasePlayerInstead) {
-					actualDestinationX = player.x;
-					actualDestinationY = player.y;
-				}
-			   
-				if (chaser.x < actualDestinationX) {
-					chaser.x += chaser.speed;
-				} else if (chaser.x > actualDestinationX) {
-					chaser.x -= chaser.speed;
-				}
-			   
-				if (chaser.y < actualDestinationY) {
-					chaser.y += chaser.speed;
-				} else if (chaser.y > actualDestinationY) {
-					chaser.y -= chaser.speed;
-				}
-		  
-				if (isChaserNearPoint(chaser, actualDestinationX, actualDestinationY)) {
-					if (!chaser.chasePlayerInstead) {
-						chaser.destinationX = getRandomNum(screenWidth);
-						chaser.destinationY = getRandomNum(screenHeight);
-					}
-				}
-				
-				if (isChaserNearPoint(chaser, player.x, player.y)) {
-					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
-				}
-				if (chaser.isDead) {
-					for (let i = 0; i < 5; i++) {
-						sprites.push(createDebris(chaser.x, chaser.y));
-					}
-				}
-			},
-		};
-		return chaser;
-	};
 	
 	let createDebris = function(x, y) {
 			let debris = {
@@ -195,13 +214,13 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			y: y,
 			destinationX: getRandomNum(screenWidth),
 			destinationY: getRandomNum(screenHeight),
-			speed: 0.2,
+			speed: 0.5,
 			radius: 10,
 			drawMe: function(g) {
 						g.drawCircle(debris.x, debris.y, debris.radius, "#061822") 
 				},
 			updateMe: function() {
-					debris.radius = debris.radius - 0.1;
+					debris.radius = debris.radius - 0.5;
 					if (debris.radius <= 0) { debris.isDead = true;}
 					if (debris.x < debris.destinationX) {
 							debris.x += debris.speed;

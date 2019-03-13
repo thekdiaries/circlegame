@@ -76,7 +76,7 @@ function runGame() {
 	   
 		// every potential screen will probably want to start with a blank background.
 		graphics.drawRectangle(0, 0, canvas.width, canvas.height, "#282720");
-	   
+		
 		currentScene.drawToScreen(graphics);
 	}
 

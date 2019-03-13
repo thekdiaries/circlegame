@@ -4,7 +4,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		x: startX,
 		y: startY,
 		drawMe: function(g) {
-			g.drawCircle(player.x, player.y, 10, "#ab3a33");
+			g.drawCircle(player.x, player.y, 10, "#A41D23");
 		},
 		isDead: false,
 		updateMe: function() {},
@@ -12,6 +12,40 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 	};
 
 	var sprites = [player];
+	
+	let createObstacle = function() {
+		let obstacle = {
+			x: getRandomNum(screenWidth),
+			y: getRandomNum(screenHeight),
+			destinationX: player.x,
+			destinationY: player.y,
+			speed: 0.02,
+			radius: 10,
+			drawMe: function(g) {
+						g.drawCircle(obstacle.x, obstacle.y, obstacle.radius, "#090803") 
+				},
+			updateMe: function() {
+					obstacle.radius += 0.002;
+					if (obstacle.x < obstacle.destinationX) {
+							obstacle.x += obstacle.speed;
+					} else if (obstacle.x > obstacle.destinationX) {
+							obstacle.x -= obstacle.speed;
+					}
+					   
+					if (obstacle.y < obstacle.destinationY) {
+							obstacle.y += obstacle.speed;
+					} else if (obstacle.y > obstacle.destinationY) {
+							obstacle.y -= obstacle.speed;
+					}
+					if (isChaserNearPoint(obstacle, player.x, player.y)) {
+					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
+					}
+				},
+			type: "obstacle",
+			isDead: false,
+		}
+	return obstacle;
+	}	
  	
 	let typeCounter = function(string) {
 		let counter = 0;
@@ -31,10 +65,10 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 	let sceneChangeCountdown = -1;
 	
 	let isChaserNearPoint = function(chaser, x, y) {
-		if (chaser.y > y - 10 &&
-			chaser.y < y + 10 &&
-			chaser.x > x - 10 &&
-			chaser.x < x + 10) {
+		if (chaser.y > y - chaser.radius &&
+			chaser.y < y + chaser.radius &&
+			chaser.x > x - chaser.radius &&
+			chaser.x < x + chaser.radius) {
 				return true;
 		}
 	};
@@ -43,7 +77,8 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		let dot = {
 			x: getRandomNum(screenWidth),
 			y: getRandomNum(screenHeight),
-			color: "#b2817d",
+			//color: "#b2817d",
+			color: "#8E546C",
 			drawMe: function(g){
 				g.drawCircle(dot.x, dot.y, 5, dot.color);
 			},
@@ -56,7 +91,10 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 						for (let chaser of sprites.filter(function(sprites) { return sprites.type === "chaser"; })) {
 							chaser.isDead = true;
 						}
-						if (levelNum == 4) {
+						for (let obstacle of sprites.filter(function(sprites) { return sprites.type === "obstacle"; })) {
+							obstacle.isDead = true;
+						}
+						if (levelNum == 5) {
 							sceneChangeCountdown = -1;
 						} else {
 						sceneChangeCountdown = 500;
@@ -80,7 +118,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 	}
 	
 	let createChaser = function(x, y) {
-		let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6"];
+		let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6", "#0078AD", "#548955", "#FC9F28", "#8B5E41", "#006F8A", "#438D1C", "#1C5580"];
 		
 		let shouldChase = false;
 		if (levelNum == 2) {
@@ -96,16 +134,20 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			y: y,
 			color: colors[getRandomNum(colors.length)],
 			speed: 0.35 + Math.random() * 0.3,
+			radius: 10,
 			destinationX: getRandomNum(screenWidth),
 			destinationY: getRandomNum(screenHeight),
 			chasePlayerInstead: shouldChase,
 			drawMe: function(g) {
-				g.drawCircle(chaser.x, chaser.y, 10, chaser.color);
+				g.drawCircle(chaser.x, chaser.y, chaser.radius, chaser.color);
 			},
 			isDead: false,
 			type: "chaser",
 			updateMe: function() {
-				if (levelNum == 3) {
+				if (levelNum == 5) 
+					chaser.radius += 0.005;
+					
+				if (levelNum == 3 || levelNum == 5) {
 					chaser.chasePlayerInstead = true;
 				}
 				let actualDestinationX = chaser.destinationX;
@@ -156,7 +198,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			speed: 0.2,
 			radius: 10,
 			drawMe: function(g) {
-						g.drawCircle(debris.x, debris.y, debris.radius, "#e2d9a2") 
+						g.drawCircle(debris.x, debris.y, debris.radius, "#061822") 
 				},
 			updateMe: function() {
 					debris.radius = debris.radius - 0.1;
@@ -178,6 +220,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		};
 	return debris;
 	}
+		
 	var gameplayScene = {
 		handleUserInput: function(pressedKeys, pressedThisFrame) {
 			if (pressedKeys.right && player.x < screenWidth) {

@@ -41,9 +41,12 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 			isDead: false,
 			type: "chaser",
 			updateMe: function() {
-				if (levelNum == 5 || levelNum == 6) 
+				if (levelNum == 5) {
 					chaser.radius += 0.005;
-					
+				}
+				if (levelNum == 6) {
+					chaser.radius += 0.02;
+				}
 				if (levelNum == 3 || levelNum == 5) {
 					chaser.chasePlayerInstead = true;
 				}

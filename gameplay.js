@@ -1,4 +1,8 @@
 
+let getRandomNum = function(max) {
+		return Math.floor(Math.random() * max);
+	};
+
 function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	let player = {
 		x: startX,
@@ -81,7 +85,7 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 				}
 				if (chaser.isDead) {
 					for (let i = 0; i < 5; i++) {
-						sprites.push(createDebris(chaser.x, chaser.y));
+						sprites.push(new Debris(chaser.x, chaser.y, screenWidth, screenHeight));
 					}
 				}
 			},
@@ -133,10 +137,6 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 		return counter;
 	};
 	
-	
-	let getRandomNum = function(max) {
-		return Math.floor(Math.random() * max);
-	};
    
 	let sceneChangeCountdown = -1;
 	
@@ -209,38 +209,6 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 			sprites.push(createChaser(0, 0));
 		}
 		sprites.push(dot);
-	}
-	
-	let createDebris = function(x, y) {
-			let debris = {
-			x: x,
-			y: y,
-			destinationX: getRandomNum(screenWidth),
-			destinationY: getRandomNum(screenHeight),
-			speed: 0.5,
-			radius: 10,
-			drawMe: function(g) {
-						g.drawCircle(debris.x, debris.y, debris.radius, "#061822") 
-				},
-			updateMe: function() {
-					debris.radius = debris.radius - 0.5;
-					if (debris.radius <= 0) { debris.isDead = true;}
-					if (debris.x < debris.destinationX) {
-							debris.x += debris.speed;
-					} else if (debris.x > debris.destinationX) {
-							debris.x -= debris.speed;
-					}
-					   
-					if (debris.y < debris.destinationY) {
-							debris.y += debris.speed;
-					} else if (debris.y > debris.destinationY) {
-							debris.y -= debris.speed;
-					}
-				},
-			type: "debris",
-			isDead: false,
-		};
-	return debris;
 	}
 	
 	this.handleUserInput = function(pressedKeys, pressedThisFrame) {

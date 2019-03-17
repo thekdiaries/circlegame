@@ -59,7 +59,7 @@ function runGame() {
 		},
 	};
 	
-	let currentScene = createGameplayScene(1, canvas.width/2, canvas.height/2, canvas.width, canvas.height);
+	let currentScene = new GameplayScene(1, canvas.width/2, canvas.height/2, canvas.width, canvas.height);
 
 	switchToNewScene = function(newScene) {
 		currentScene = newScene;

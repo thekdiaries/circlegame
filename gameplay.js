@@ -1,5 +1,5 @@
 
-var createGameplayScene = function(levelNum, startX, startY, screenWidth, screenHeight) {
+function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	let player = {
 		x: startX,
 		y: startY,
@@ -77,7 +77,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 				}
 				
 				if (doSpritesCollide(chaser, player)) {
-					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
+					switchToNewScene(new GameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
 				}
 				if (chaser.isDead) {
 					for (let i = 0; i < 5; i++) {
@@ -114,7 +114,7 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 							obstacle.y -= obstacle.speed;
 					}
 					if (doSpritesCollide(obstacle, player)) {
-					switchToNewScene(createGameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
+					switchToNewScene(new GameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
 					}
 				},
 			type: "obstacle",
@@ -242,9 +242,8 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 		};
 	return debris;
 	}
-		
-	var gameplayScene = {
-		handleUserInput: function(pressedKeys, pressedThisFrame) {
+	
+	this.handleUserInput = function(pressedKeys, pressedThisFrame) {
 			if (pressedKeys.right && player.x < screenWidth) {
 				player.x += 1;
 			} else if (pressedKeys.left && player.x > 0) {
@@ -262,23 +261,22 @@ var createGameplayScene = function(levelNum, startX, startY, screenWidth, screen
 					switchToNewScene(createPauseScene(gameplayScene, screenWidth, screenHeight));
 				}
 			}
-		},
+		};
 	   
-		updateModel: function() {
+	this.updateModel = function() {
 			sceneChangeCountdown -= 1;
 			if (sceneChangeCountdown == 0) {
-				switchToNewScene(createGameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
+				switchToNewScene(new GameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
 			}
 			sprites.forEach(function(sprite) {
 				sprite.updateMe();
 			})
 			sprites = sprites.filter(function(sprite) { return !sprite.isDead });
-		},
-        drawToScreen: function(g) {
+		};
+		
+    this.drawToScreen = function(g) {
             sprites.forEach (function(sprite){
 				sprite.drawMe(g);
 			})
-        }
-    }
-    return gameplayScene;
-};
+        };
+}

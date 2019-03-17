@@ -4,18 +4,8 @@ let getRandomNum = function(max) {
 	};
 
 function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
-	let player = {
-		x: startX,
-		y: startY,
-		radius: 10,
-		drawMe: function(g) {
-			g.drawCircle(player.x, player.y, player.radius, "#A41D23");
-		},
-		isDead: false,
-		updateMe: function() {},
-		type: "player",
-	};
-
+	
+	let player = new Player(startX, startY);
 	var sprites = [player];
 	
 		let createChaser = function(x, y) {

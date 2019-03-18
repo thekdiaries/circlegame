@@ -1,4 +1,4 @@
-function Dot(screenWidth, screenHeight, player, levelNum, sprites){
+function Dot(screenWidth, screenHeight, player, levelNum){
 	this.x = getRandomNum(screenWidth);
 	this.y = getRandomNum(screenHeight);
 	"#b2817d",
@@ -24,12 +24,12 @@ function Dot(screenWidth, screenHeight, player, levelNum, sprites){
 				sceneChangeCountdown = 500;
 				}
 			} else if (this.isDead && levelNum !== 4 && levelNum !== 6) {
-				sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player, sprites));
+				sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player));
 			} else if (levelNum == 4) {
 				if (typeCounter("chaser", sprites) < 41) {
 					if (this.isDead) {
 						for (let i = 0; i < 41; i++) {
-							sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player, sprites));
+							sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player));
 						}
 					}
 				}

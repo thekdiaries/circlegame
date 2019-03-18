@@ -37,10 +37,9 @@ let doSpritesCollide = function(a, b) {
 
 function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	
-	var sprites = [];
 	
 	let player = new Player(startX, startY);
-	sprites.push(player);
+	this.sprites.push(player);
 	
 	let createObstacle = function() {
 		let obstacle = {
@@ -77,8 +76,8 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	}	
  	
 	for (let i = 0; i < 10; i++) {
-		let dot = new Dot(screenWidth, screenHeight, player, levelNum, sprites);
-		sprites.push(dot);
+		let dot = new Dot(screenWidth, screenHeight, player, levelNum);
+		this.sprites.push(dot);
 	}
 	
 	this.handleUserInput = function(pressedKeys, pressedThisFrame) {
@@ -106,16 +105,17 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 			if (sceneChangeCountdown == 0) {
 				switchToNewScene(new GameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
 			}
-			sprites.forEach(function(sprite) {
+			this.sprites.forEach(function(sprite) {
 				sprite.updateMe();
 			})
-			sprites = sprites.filter(function(sprite) { return !sprite.isDead });
+			this.sprites = this.sprites.filter(function(sprite) { return !sprite.isDead });
 		};
 		
     this.drawToScreen = function(g) {
-            sprites.forEach (function(sprite){
+            this.sprites.forEach (function(sprite){
 				sprite.drawMe(g);
 			})
         };
+	this.sprites = [];
 }
 

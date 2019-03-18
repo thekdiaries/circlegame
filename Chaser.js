@@ -1,4 +1,4 @@
-function Chaser(x, y, screenWidth, screenHeight, levelNum, player) {
+function Chaser(x, y, screenWidth, screenHeight, levelNum, player, sprites) {
 	let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6", "#0078AD", "#548955", "#FC9F28", "#8B5E41", "#006F8A", "#438D1C", "#1C5580"];
 	
 	let shouldChase = false;

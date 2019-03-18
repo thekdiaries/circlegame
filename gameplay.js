@@ -35,9 +35,9 @@ let doSpritesCollide = function(a, b) {
 	return distanceBetweenSprites(a, b) <= a.radius + b.radius;
 };
 
-var sprites = [];
-
 function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
+	
+	var sprites = [];
 	
 	let player = new Player(startX, startY);
 	sprites.push(player);
@@ -77,7 +77,7 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	}	
  	
 	for (let i = 0; i < 10; i++) {
-		let dot = new Dot(screenWidth, screenHeight, player, levelNum);
+		let dot = new Dot(screenWidth, screenHeight, player, levelNum, sprites);
 		sprites.push(dot);
 	}
 	

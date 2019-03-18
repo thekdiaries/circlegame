@@ -24,12 +24,12 @@ function Dot(screenWidth, screenHeight, player, levelNum, scene){
 				sceneChangeCountdown = 500;
 				}
 			} else if (this.isDead && levelNum !== 4 && levelNum !== 6) {
-				scene.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player));
+				scene.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player, scene));
 			} else if (levelNum == 4) {
 				if (typeCounter("chaser", scene.sprites) < 41) {
 					if (this.isDead) {
 						for (let i = 0; i < 41; i++) {
-							scene.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player));
+							scene.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player, scene));
 						}
 					}
 				}

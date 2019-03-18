@@ -37,6 +37,43 @@ let doSpritesCollide = function(a, b) {
 
 function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	
+	this.handleUserInput = function(pressedKeys, pressedThisFrame) {
+			if (pressedKeys.right && player.x < screenWidth) {
+				player.x += 1;
+			} else if (pressedKeys.left && player.x > 0) {
+				player.x -= 1;
+			}
+		   
+			if (pressedKeys.up && player.y > 0) {
+				player.y -= 1;
+			} else if (pressedKeys.down && player.y < screenHeight) {
+				player.y += 1;
+			}
+		   
+			for (let key of pressedThisFrame) {
+				if (key == 'p') {
+					switchToNewScene(createPauseScene(gameplayScene, screenWidth, screenHeight));
+				}
+			}
+		};
+	   
+	this.updateModel = function() {
+			sceneChangeCountdown -= 1;
+			if (sceneChangeCountdown == 0) {
+				switchToNewScene(new GameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
+			}
+			this.sprites.forEach(function(sprite) {
+				sprite.updateMe();
+			})
+			this.sprites = this.sprites.filter(function(sprite) { return !sprite.isDead });
+		};
+		
+    this.drawToScreen = function(g) {
+            this.sprites.forEach (function(sprite){
+				sprite.drawMe(g);
+			})
+        };
+	this.sprites = [];
 	
 	let player = new Player(startX, startY);
 	this.sprites.push(player);
@@ -76,46 +113,8 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	}	
  	
 	for (let i = 0; i < 10; i++) {
-		let dot = new Dot(screenWidth, screenHeight, player, levelNum);
+		let dot = new Dot(screenWidth, screenHeight, player, levelNum, this);
 		this.sprites.push(dot);
 	}
-	
-	this.handleUserInput = function(pressedKeys, pressedThisFrame) {
-			if (pressedKeys.right && player.x < screenWidth) {
-				player.x += 1;
-			} else if (pressedKeys.left && player.x > 0) {
-				player.x -= 1;
-			}
-		   
-			if (pressedKeys.up && player.y > 0) {
-				player.y -= 1;
-			} else if (pressedKeys.down && player.y < screenHeight) {
-				player.y += 1;
-			}
-		   
-			for (let key of pressedThisFrame) {
-				if (key == 'p') {
-					switchToNewScene(createPauseScene(gameplayScene, screenWidth, screenHeight));
-				}
-			}
-		};
-	   
-	this.updateModel = function() {
-			sceneChangeCountdown -= 1;
-			if (sceneChangeCountdown == 0) {
-				switchToNewScene(new GameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
-			}
-			this.sprites.forEach(function(sprite) {
-				sprite.updateMe();
-			})
-			this.sprites = this.sprites.filter(function(sprite) { return !sprite.isDead });
-		};
-		
-    this.drawToScreen = function(g) {
-            this.sprites.forEach (function(sprite){
-				sprite.drawMe(g);
-			})
-        };
-	this.sprites = [];
 }
 

@@ -115,6 +115,9 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	for (let i = 0; i < 10; i++) {
 		let dot = new Dot(screenWidth, screenHeight, player, levelNum, this);
 		this.sprites.push(dot);
+		if (levelNum == 6) {
+			this.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player, this));
+		}
 	}
 }
 

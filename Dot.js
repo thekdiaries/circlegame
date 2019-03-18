@@ -35,11 +35,9 @@ function Dot(screenWidth, screenHeight, player, levelNum, scene){
 				}
 			} else if (levelNum == 6) {
 				if (this.isDead) {
-					scene.sprites.filter(function(sprites) { return sprites.type === "chaser"; })[1].isDead = true;
+					scene.sprites.filter(function(sprite) { return sprite.type === "chaser"; })[0].isDead = true;
 				}
 			} 
-				
-		}
-		 
+		}				
 	};
 };

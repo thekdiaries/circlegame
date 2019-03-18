@@ -78,6 +78,8 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
  	
 	for (let i = 0; i < 10; i++) {
 		let dot = new Dot(screenWidth, screenHeight, player, levelNum);
+		sprites.push(dot);
+	}
 	
 	this.handleUserInput = function(pressedKeys, pressedThisFrame) {
 			if (pressedKeys.right && player.x < screenWidth) {
@@ -115,5 +117,5 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 				sprite.drawMe(g);
 			})
         };
-	}
-};
+}
+

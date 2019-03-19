@@ -24,7 +24,7 @@ function runGame() {
 			return 'p';
 		}
 		return 'unknown';
-	}
+	};
 
 	var keyDownHandler = function(e) {
 		var key = getKeyFromEvent(e);
@@ -63,7 +63,7 @@ function runGame() {
 
 	switchToNewScene = function(newScene) {
 		currentScene = newScene;
-	}
+	};
 	
 	var runFrame = function() {
 	   
@@ -78,7 +78,7 @@ function runGame() {
 		graphics.drawRectangle(0, 0, canvas.width, canvas.height, "#282720");
 		
 		currentScene.drawToScreen(graphics);
-	}
+	};
 
 	document.addEventListener("keydown", keyDownHandler, false);
 	document.addEventListener("keyup", keyUpHandler, false);

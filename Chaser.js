@@ -1,7 +1,9 @@
-function Chaser(x, y, screenWidth, screenHeight, scene) {
+function Chaser(x, y, scene) {
 	let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6", "#0078AD", "#548955", "#FC9F28", "#8B5E41", "#006F8A", "#438D1C", "#1C5580"];
 	let levelNum = scene.levelNum;
 	let player = scene.player;
+	let screenWidth = scene.screenWidth;
+	let screenHeight = scene.screenHeight;
 	
 	let shouldChase = false;
 	if (levelNum == 2 || levelNum == 6) {
@@ -26,6 +28,8 @@ function Chaser(x, y, screenWidth, screenHeight, scene) {
 
 Chaser.prototype.updateMe = function(scene) {
 	let player = scene.player;
+	let screenWidth = scene.screenWidth;
+	let screenHeight = scene.screenHeight;
 		if (levelNum == 5) {
 			this.radius += 0.005;
 		}

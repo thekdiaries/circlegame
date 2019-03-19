@@ -1,4 +1,6 @@
-function Dot(screenWidth, screenHeight, scene){
+function Dot(scene){
+	let screenWidth = scene.screenWidth;
+	let screenHeight = scene.screenHeight;
 	this.x = getRandomNum(screenWidth);
 	this.y = getRandomNum(screenHeight);
 	this.color = "#8E546C";
@@ -6,10 +8,13 @@ function Dot(screenWidth, screenHeight, scene){
 	this.type = "dot";
 };
 
-Dot.prototype.updateMe = function(scene, screenWidth, screenHeight) {
+Dot.prototype.updateMe = function(scene) {
 	let player = scene.player;
 	let levelNum = scene.levelNum;
 	let sceneChangeCountdown = scene.sceneChangeCountdown;
+	let screenWidth = scene.screenWidth;
+	let screenHeight = scene.screenHeight;
+	
 	if (this.y > player.y - 10 && this.y < player.y + 10 && this.x > player.x - 10 && this.x < player.x + 10) {
 		this.isDead = true;
 		if (typeCounter("dot", scene.sprites) === 0) {
@@ -25,12 +30,12 @@ Dot.prototype.updateMe = function(scene, screenWidth, screenHeight) {
 				sceneChangeCountdown = 500;
 			}
 		} else if (this.isDead && levelNum !== 4 && levelNum !== 6) {
-			scene.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, scene));
+			scene.sprites.push(new Chaser(0, 0, scene));
 		} else if (levelNum == 4) {
 			if (typeCounter("chaser", scene.sprites) < 41) {
 				if (this.isDead) {
 					for (let i = 0; i < 41; i++) {
-						scene.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, scene));
+						scene.sprites.push(new Chaser(0, 0, scene));
 					}
 				}
 			}

@@ -1,9 +1,8 @@
 function Dot(screenWidth, screenHeight, player, levelNum, scene){
 	this.x = getRandomNum(screenWidth);
 	this.y = getRandomNum(screenHeight);
-	"#b2817d",
 	this.color = "#8E546C";
-	this.drawMe = function(g){
+	this.drawMe = function(g) {
 		g.drawCircle(this.x, this.y, 5, this.color);
 	};
 	this.isDead = false;
@@ -21,7 +20,7 @@ function Dot(screenWidth, screenHeight, player, levelNum, scene){
 				if (levelNum == 6) {
 					sceneChangeCountdown = -1;
 				} else {
-				sceneChangeCountdown = 500;
+					sceneChangeCountdown = 500;
 				}
 			} else if (this.isDead && levelNum !== 4 && levelNum !== 6) {
 				scene.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player, scene));
@@ -38,6 +37,6 @@ function Dot(screenWidth, screenHeight, player, levelNum, scene){
 					scene.sprites.filter(function(sprite) { return sprite.type === "chaser"; })[0].isDead = true;
 				}
 			} 
-		}				
+		}
 	};
 };

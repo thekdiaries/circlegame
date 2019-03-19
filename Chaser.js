@@ -9,7 +9,6 @@ function Chaser(x, y, screenWidth, screenHeight, levelNum, player, scene) {
 	} else if (levelNum == 3) {
 		shouldChase = true;
 	}
-	
 
 	this.x = x;
 	this.y = y;

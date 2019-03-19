@@ -13,7 +13,7 @@ Debris.prototype.drawMe = function(g) {
 	g.drawCircle(this.x, this.y, this.radius, "#061822") 
 };
 
-Debris.prototype.updateMe = function() {
+Debris.prototype.updateMe = function(scene) {
 	this.radius = this.radius - 0.5;
 	if (this.radius <= 0) { this.isDead = true;}
 	if (this.x < this.destinationX) {

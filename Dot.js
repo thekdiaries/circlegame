@@ -6,8 +6,6 @@ function Dot(screenWidth, screenHeight, scene){
 	this.type = "dot";
 };
 
-Dot.prototype = Object.create(Dot.prototype);
-
 Dot.prototype.updateMe = function(scene, screenWidth, screenHeight) {
 	let player = scene.player;
 	let levelNum = scene.levelNum;

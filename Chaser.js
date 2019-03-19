@@ -71,8 +71,6 @@ Chaser.prototype.updateMe = function(scene) {
 		}
 	};
 
-Chaser.prototype = Object.create(Chaser.prototype);
-
 Chaser.prototype.drawMe = function(g) {
 		g.drawCircle(this.x, this.y, this.radius, this.color);
 	};

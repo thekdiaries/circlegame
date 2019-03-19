@@ -6,7 +6,7 @@ function Player(startX, startY) {
 	this.type = "player";
 };
 
-Player.prototype.updateMe = function() {};
+Player.prototype.updateMe = function(scene) {};
 
 Player.prototype.drawMe = function(g) {
 	g.drawCircle(this.x, this.y, this.radius, "#A41D23");

@@ -12,29 +12,13 @@ let typeCounter = function(string, sprites) {
 	return counter;
 };
 
-let sceneChangeCountdown = -1;
-
-let isChaserNearPoint = function(chaser, x, y) {
-	if (chaser.y > y - chaser.radius &&
-		chaser.y < y + chaser.radius &&
-		chaser.x > x - chaser.radius &&
-		chaser.x < x + chaser.radius) {
-		
-		return true;
-	}
-};
-
-let distanceBetweenSprites = function(a, b) {
-	let diffX = a.x - b.x;
-	let diffY = a.y - b.y;
-	return Math.sqrt(diffX * diffX + diffY * diffY);
-};
-
-let doSpritesCollide = function(a, b) {
-	return distanceBetweenSprites(a, b) <= a.radius + b.radius;
-};
 
 function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
+	
+	this.levelNum = levelNum;
+	this.sceneChangeCountdown = -1;
+	this.screenWidth = screenWidth;
+	this.screenHeight = screenHeight;
 	
 	this.handleUserInput = function(pressedKeys, pressedThisFrame) {
 		if (pressedKeys.right && player.x < screenWidth) {
@@ -57,12 +41,12 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	};
 
 	this.updateModel = function() {
-		sceneChangeCountdown -= 1;
-		if (sceneChangeCountdown == 0) {
+		this.sceneChangeCountdown -= 1;
+		if (this.sceneChangeCountdown == 0) {
 			switchToNewScene(new GameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
 		}
-		this.sprites.forEach(function(sprite) {
-			sprite.updateMe();
+		this.sprites.forEach((sprite) => {
+			sprite.updateMe(this);
 		});
 		this.sprites = this.sprites.filter(function(sprite) { return !sprite.isDead });
 	};
@@ -76,7 +60,28 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	this.sprites = [];
 	
 	let player = new Player(startX, startY);
+	this.player = player;
 	this.sprites.push(player);
+	
+	this.isNearPoint = function(chaser, x, y) {
+	if (chaser.y > y - chaser.radius &&
+		chaser.y < y + chaser.radius &&
+		chaser.x > x - chaser.radius &&
+		chaser.x < x + chaser.radius) {
+		
+		return true;
+	}
+	};
+
+	this.distanceBetweenSprites = function(a, b) {
+		let diffX = a.x - b.x;
+		let diffY = a.y - b.y;
+		return Math.sqrt(diffX * diffX + diffY * diffY);
+	};
+
+	this.doesCollide = function(a, b) {
+		return this.distanceBetweenSprites(a, b) <= a.radius + b.radius;
+	};
 	
 	let createObstacle = function() {
 		let obstacle = {
@@ -113,10 +118,10 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	};
  	
 	for (let i = 0; i < 10; i++) {
-		let dot = new Dot(screenWidth, screenHeight, player, levelNum, this);
+		let dot = new Dot(this);
 		this.sprites.push(dot);
 		if (levelNum == 6) {
-			this.sprites.push(new Chaser(0, 0, screenWidth, screenHeight, levelNum, player, this));
+			this.sprites.push(new Chaser(0, 0, this));
 		}
 	}
 }

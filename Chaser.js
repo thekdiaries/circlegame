@@ -1,5 +1,9 @@
-function Chaser(x, y, screenWidth, screenHeight, levelNum, player, scene) {
+function Chaser(x, y, scene) {
 	let colors = ["#ceccc0", "#99a552", "#c3a022", "#24576c", "#a48897", "#3fb994", "#a6542b", "#494d42", "#ecd1d6", "#0078AD", "#548955", "#FC9F28", "#8B5E41", "#006F8A", "#438D1C", "#1C5580"];
+	let levelNum = scene.levelNum;
+	let player = scene.player;
+	let screenWidth = scene.screenWidth;
+	let screenHeight = scene.screenHeight;
 	
 	let shouldChase = false;
 	if (levelNum == 2 || levelNum == 6) {
@@ -18,12 +22,16 @@ function Chaser(x, y, screenWidth, screenHeight, levelNum, player, scene) {
 	this.destinationX = getRandomNum(screenWidth);
 	this.destinationY = getRandomNum(screenHeight);
 	this.chasePlayerInstead = shouldChase;
-	this.drawMe = function(g) {
-		g.drawCircle(this.x, this.y, this.radius, this.color);
-	};
 	this.isDead = false;
 	this.type = "chaser";
-	this.updateMe = function() {
+};
+
+Chaser.prototype.updateMe = function(scene) {
+	let player = scene.player;
+	let screenWidth = scene.screenWidth;
+	let screenHeight = scene.screenHeight;
+	let levelNum = scene.levelNum;
+	let distanceBetweenSprites = scene.distanceBetweenSprites;
 		if (levelNum == 5) {
 			this.radius += 0.005;
 		}
@@ -52,14 +60,14 @@ function Chaser(x, y, screenWidth, screenHeight, levelNum, player, scene) {
 			this.y -= this.speed;
 		}
   
-		if (isChaserNearPoint(this, actualDestinationX, actualDestinationY)) {
+		if (scene.isNearPoint(this, actualDestinationX, actualDestinationY)) {
 			if (!this.chasePlayerInstead) {
 				this.destinationX = getRandomNum(screenWidth);
 				this.destinationY = getRandomNum(screenHeight);
 			}
 		}
 		
-		if (doSpritesCollide(this, player)) {
+		if (scene.doesCollide(this, player)) {
 			switchToNewScene(new GameplayScene(levelNum, screenWidth/2, screenHeight/2, screenWidth, screenHeight));
 		}
 		if (this.isDead) {
@@ -68,4 +76,7 @@ function Chaser(x, y, screenWidth, screenHeight, levelNum, player, scene) {
 			}
 		}
 	};
-};
+
+Chaser.prototype.drawMe = function(g) {
+		g.drawCircle(this.x, this.y, this.radius, this.color);
+	};

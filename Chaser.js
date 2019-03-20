@@ -30,6 +30,8 @@ Chaser.prototype.updateMe = function(scene) {
 	let player = scene.player;
 	let screenWidth = scene.screenWidth;
 	let screenHeight = scene.screenHeight;
+	let levelNum = scene.levelNum;
+	let distanceBetweenSprites = scene.distanceBetweenSprites;
 		if (levelNum == 5) {
 			this.radius += 0.005;
 		}

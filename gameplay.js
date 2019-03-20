@@ -45,8 +45,8 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 		if (this.sceneChangeCountdown == 0) {
 			switchToNewScene(new GameplayScene(levelNum + 1, player.x, player.y, screenWidth, screenHeight));
 		}
-		this.sprites.forEach(function(sprite) {
-			sprite.updateMe(scene);
+		this.sprites.forEach((sprite) => {
+			sprite.updateMe(this);
 		});
 		this.sprites = this.sprites.filter(function(sprite) { return !sprite.isDead });
 	};
@@ -80,7 +80,7 @@ function GameplayScene(levelNum, startX, startY, screenWidth, screenHeight) {
 	};
 
 	this.doesCollide = function(a, b) {
-		return distanceBetweenSprites(a, b) <= a.radius + b.radius;
+		return this.distanceBetweenSprites(a, b) <= a.radius + b.radius;
 	};
 	
 	let createObstacle = function() {

@@ -11,7 +11,6 @@ function Dot(scene){
 Dot.prototype.updateMe = function(scene) {
 	let player = scene.player;
 	let levelNum = scene.levelNum;
-	let sceneChangeCountdown = scene.sceneChangeCountdown;
 	let screenWidth = scene.screenWidth;
 	let screenHeight = scene.screenHeight;
 	
@@ -25,9 +24,9 @@ Dot.prototype.updateMe = function(scene) {
 				obstacle.isDead = true;
 			}
 			if (levelNum == 6) {
-				sceneChangeCountdown = -1;
+				scene.sceneChangeCountdown = -1;
 			} else {
-				sceneChangeCountdown = 500;
+				scene.sceneChangeCountdown = 500;
 			}
 		} else if (this.isDead && levelNum !== 4 && levelNum !== 6) {
 			scene.sprites.push(new Chaser(0, 0, scene));
